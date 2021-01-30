@@ -85,6 +85,7 @@
                                     <th>Price</th>
                                     <th>Shop ID</th>
                                     <th>Customer ID</th>
+                                    <th></th>
                                 </tr>
                             </thead>
                         </table>
@@ -92,8 +93,13 @@
                 </div>
             </div>
         </div>
+        <div class="row">
+            <div class="col-8">
+                <div id="notify"></div>
+            </div>
+        </div>
     </div>
-    
+
     <div class="modal fade" id="UserModal" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -120,7 +126,7 @@
             </div>
         </div>
     </div>
-    
+
     <script>
         $(document).ready(function() {
             // get product list
@@ -174,6 +180,10 @@
                 ],
                 "createdRow": function (row, data) {
                     var vip_only = data["vip_only"]
+                    var stock_pcs = data["stock_pcs"]
+                    if (stock_pcs === 0){
+                        $('td', row).eq(1).html("<font color='red'>0(out of stock)</font>")
+                    }
                     if (vip_only === true){
                         $('td', row).eq(-1).html("<input type='checkbox' class='form-check-inline' checked disabled>")
                     }
@@ -203,8 +213,20 @@
                     {'data': 'qty'},
                     {'data': 'price'},
                     {'data': 'shop__id'},
-                    {'data': 'customer__id'}
+                    {'data': 'customer__id'},
+                    null,
                 ],
+                "columnDefs": [
+                    {
+                        "targets": [6],
+                        "data": null,
+                        "defaultContent": ""
+                    }
+                ],
+                "createdRow": function (row, data) {
+                    var order_id = data["id"]
+                    $('td', row).eq(-1).html('<button type="button" class="btn btn-sm btn-danger" id='+order_id+' onclick="delete_order(this)">刪除訂單</button>')
+                }
             });
         });
 
@@ -219,10 +241,10 @@
                     xhr.setRequestHeader("X-CSRFToken", '{{csrf_token}}');
                 },
                 success: function (msg) {
+                    product_datatable.ajax.reload();
                     order_datatable.ajax.reload();
                     $("#product_select").val("");
                     $("#qty_input").val("");
-
                 },
                 error: function (err){
                     console.log(err.responseJSON);
@@ -250,7 +272,38 @@
                 }
             });
         }
+
+        function delete_order(elem){
+            var order_id = elem.id
+            $.ajax({
+                type: 'DELETE',
+                url: '/api/order/'+order_id+"/",
+                contentType: 'application/json; charset=UTF-8',
+                beforeSend: function(xhr) {
+                    xhr.setRequestHeader("X-CSRFToken", '{{csrf_token}}');
+                },
+                success: function (msg) {
+                    product_datatable.ajax.reload();
+                    order_datatable.ajax.reload();
+                    if (msg != undefined && msg !=""){
+                        $("#notify").html(
+                            '<div class="alert alert-success alert-dismissible">'+
+                            '<strong>'+msg+'</strong>'+
+                            '<button type="button" class="close" data-dismiss="alert">&times;</button>'+
+                            '</div>'
+                        )
+                    }
+                },
+                error: function (err){
+                    $("#notify").html(
+                        '<div class="alert alert-danger alert-dismissible">'+
+                        '<strong>'+JSON.stringify(err.responseJSON)+'</strong>'+
+                        '<button type="button" class="close" data-dismiss="alert">&times;</button>'+
+                        '</div>'
+                    )
+                }
+            });
+        }
     </script>
   </body>
 </html>
- 
