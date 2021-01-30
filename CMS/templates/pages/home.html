@@ -139,7 +139,12 @@
                     }
                 },
                 error: function (err){
-                    console.log(err)
+                    $("#notify").html(
+                        '<div class="alert alert-danger alert-dismissible">'+
+                        '<strong>'+JSON.stringify(err.responseJSON)+'</strong>'+
+                        '<button type="button" class="close" data-dismiss="alert">&times;</button>'+
+                        '</div>'
+                    )
                 }
             });
 
@@ -153,7 +158,12 @@
                     }
                 },
                 error: function (err){
-                    console.log(err)
+                    $("#notify").html(
+                        '<div class="alert alert-danger alert-dismissible">'+
+                        '<strong>'+JSON.stringify(err.responseJSON)+'</strong>'+
+                        '<button type="button" class="close" data-dismiss="alert">&times;</button>'+
+                        '</div>'
+                    )
                 }
             });
 
@@ -247,7 +257,12 @@
                     $("#qty_input").val("");
                 },
                 error: function (err){
-                    console.log(err.responseJSON);
+                    $("#notify").html(
+                        '<div class="alert alert-danger alert-dismissible">'+
+                        '<strong>'+JSON.stringify(err.responseJSON)+'</strong>'+
+                        '<button type="button" class="close" data-dismiss="alert">&times;</button>'+
+                        '</div>'
+                    )
                 }
             });
         }
@@ -268,7 +283,12 @@
 
                 },
                 error: function (err){
-                    console.log(err.responseJSON);
+                    $("#notify").html(
+                        '<div class="alert alert-danger alert-dismissible">'+
+                        '<strong>'+JSON.stringify(err.responseJSON)+'</strong>'+
+                        '<button type="button" class="close" data-dismiss="alert">&times;</button>'+
+                        '</div>'
+                    )
                 }
             });
         }
