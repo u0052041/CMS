@@ -1,3 +1,4 @@
+from django.db import transaction
 from django.db.models import F
 from django.http.response import JsonResponse
 from django.shortcuts import render
@@ -5,7 +6,9 @@ from rest_framework import status, viewsets
 from rest_framework.response import Response
 from rest_framework.authentication import SessionAuthentication
 from .models import Order
+from product.models import Product
 from .serializers import OrderSerializer
+from CMS import decorator
 
 
 class OrderViewSet(viewsets.ModelViewSet):
@@ -13,6 +16,19 @@ class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
     lookup_field = "id"
+
+    @transaction.atomic
+    @decorator.check_vip
+    @decorator.check_product_is_enough
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        product_obj = Product.objects.select_for_update(nowait=True).get(id=request.data.get("product"))
+        product_obj.stock_pcs -= int(request.data.get("qty"))
+        product_obj.save(update_fields=["stock_pcs"])
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 
 def datatable_order_list(request):
@@ -22,7 +38,7 @@ def datatable_order_list(request):
     length = int(request.GET.get("length"))  # 單頁行數
     start = int(request.GET.get("start"))  # queryset first index
 
-    order = Order.objects.all()
+    order = Order.objects.all().order_by("id")
     select_order = order[start : start + length]
     select_order = select_order.annotate(price=F("product__price"))
     json_response = dict()

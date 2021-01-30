@@ -21,7 +21,7 @@ def datatable_product_list(request):
     length = int(request.GET.get("length"))  # 單頁行數
     start = int(request.GET.get("start"))  # queryset first index
 
-    product = Product.objects.all()
+    product = Product.objects.all().order_by("id")
     select_product = product[start : start + length]
     
     json_response = dict()
