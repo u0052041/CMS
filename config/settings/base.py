@@ -53,6 +53,7 @@ DJANGO_APPS = [
 THIRD_PARTY_APPS = [
     "rest_framework",
     "rest_framework.authtoken",
+    "django_celery_beat",
 ]
 
 LOCAL_APPS = [
@@ -60,6 +61,7 @@ LOCAL_APPS = [
     "product",
     "order",
     "userprofile",
+    "shop_daily_report",
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
