@@ -35,11 +35,16 @@
                                 <input type="text" class="form-control" placeholder="數量" id="qty_input">
                             </div>
                             <div class="form-group" style="padding-left: 1%">
-                                <button type="button" class="btn btn-primary form-control" onclick="create_order(event)">＋</button>
+                                <button type="button" class="btn btn-primary form-control" onclick="create_order(event)">＋(建立訂單)</button>
                             </div>
                             <div class="form-check" style="padding-left: 1%">
                                 <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#UserModal">
                                     更改用戶VIP
+                                </button>
+                            </div>
+                             <div class="form-check" style="padding-left: 1%">
+                                <button type="button" class="btn btn-primary" onclick="getTop3()">
+                                    Top3
                                 </button>
                             </div>
                         </form>
@@ -100,29 +105,45 @@
         </div>
     </div>
 
-    <div class="modal fade" id="UserModal" tabindex="-1" role="dialog">
+    <div class="modal fade" id="UserModal" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">更新用戶VIP</h5>
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">更新用戶VIP</h5>
+                </div>
+                <div class="modal-body">
+                    <form class="form-inline">
+                        <div class="form-group" style="padding-left: 1%">
+                            <select id="user_select" class="form-control">
+                                <option value="">Select User</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="padding-left: 1%">
+                            <button type="button" class="form-control btn btn-primary" onclick="update_user_vip(true)">
+                                開啟VIP
+                            </button>
+                        </div>
+                        <div class="form-group" style="padding-left: 1%">
+                            <button type="button" class="form-control btn btn-danger" onclick="update_user_vip(false)">
+                                關閉VIP
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
-            <div class="modal-body">
-                <form class="form-inline">
-                    <div class="form-group" style="padding-left: 1%">
-                        <select id="user_select" class="form-control">
-                            <option value="">Select User</option>
-                        </select>
-                    </div>
-                    <div class="form-group" style="padding-left: 1%">
-                        <button type="button" class="form-control btn btn-primary" onclick="update_user_vip(true)">
-                            開啟VIP
-                        </button>
-                    </div>
-                    <div class="form-group" style="padding-left: 1%">
-                        <button type="button" class="form-control btn btn-danger" onclick="update_user_vip(false)">
-                            關閉VIP
-                        </button>
-                    </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="SaleTop3Modal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">銷售數量前三名</h5>
+                </div>
+                <div class="modal-body">
+                    <form id="sales_top3_form">
+                    </form>
+                </div>
             </div>
         </div>
     </div>
@@ -313,6 +334,33 @@
                             '</div>'
                         )
                     }
+                },
+                error: function (err){
+                    $("#notify").html(
+                        '<div class="alert alert-danger alert-dismissible">'+
+                        '<strong>'+JSON.stringify(err.responseJSON)+'</strong>'+
+                        '<button type="button" class="close" data-dismiss="alert">&times;</button>'+
+                        '</div>'
+                    )
+                }
+            });
+        }
+
+        function getTop3(){
+            $.ajax({
+                type: 'GET',
+                url: "/api/product/top3/",
+                success: function (data) {
+                    $("#sales_top3_form").html("")
+                    for (idx in data.top3_product){
+                        $("#sales_top3_form").append(
+                            '<div class="form-group">'+
+                                '<p>Product ID: '+data.top3_product[idx].id+', '+
+                                'Total Sales: '+data.top3_product[idx].sales_sum+'</p>'+
+                           '</div>'
+                        )
+                    }
+                    $("#SaleTop3Modal").modal("show");
                 },
                 error: function (err){
                     $("#notify").html(
